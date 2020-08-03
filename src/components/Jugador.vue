@@ -7,22 +7,33 @@
         text-variant="white"
         class="text-center"
       >
+        
+        <b-form class="form">
+          <b-row>
+            <b-col col sm="8">
+              <b-form-input size="m" placeholder="Search" v-model="usuario"></b-form-input>
+            </b-col>
+            <b-col col sm="2">
+              <b-button size="m" type="submit" @click="cargarDatos">Search</b-button>
+            </b-col>
+          </b-row>
+        </b-form>
         <b-avatar :src="avatar" size="6rem" rounded></b-avatar>
-        <h3>Username: {{ usuario }}</h3>
+        <h3>Username: {{ nombre }}</h3>
         <b-row class="tabla">
           <b-col col sm="8" class="left">
             <h5>Repositorios Públicos</h5>
             <h5>Seguidores</h5>
             <h5>Seguidos</h5>
-            <h5>Guists Públicos</h5>
+            <h5>Guists</h5>
             <h5 class="font-weight-bold">Puntaje Total</h5>
           </b-col>
           <b-col col sm="4">
-            <h5>{{repositorios}}</h5>
-            <h5>{{seguidores}}</h5>
-            <h5>{{seguidos}}</h5>
-            <h5>{{gists}}</h5>
-            <h5 class="font-weight-bold">{{puntaje}}</h5>
+            <h5>{{ repositorios }}</h5>
+            <h5>{{ seguidores }}</h5>
+            <h5>{{ seguidos }}</h5>
+            <h5>{{ gists }}</h5>
+            <h5 class="font-weight-bold">{{ puntaje }}</h5>
           </b-col>
         </b-row>
       </b-card>
@@ -38,8 +49,9 @@ export default {
   },
   data() {
     return {
+      usuario: 'pabloyanezb',
       avatar: null,
-      usuario: null,
+      nombre: null,
       repositorios: null,
       seguidores: null,
       seguidos: null,
@@ -47,23 +59,32 @@ export default {
       puntaje: null
     }
   },
+  methods: {
+    cargarDatos() {
+      this.axios.get(`https://api.github.com/users/${this.usuario}`)
+      .then((datos) => {
+        const usuario = datos.data;
+        this.avatar = usuario.avatar_url;
+        this.nombre = usuario.login;
+        this.repositorios = usuario.public_repos;          
+        this.seguidores = usuario.followers;
+        this.seguidos = usuario.following;
+        this.gists = usuario.public_gists;
+        this.puntaje = usuario.public_repos + usuario.followers + usuario.following + usuario.public_gists;
+      })
+    }
+  },
   mounted() {
-    this.axios.get('https://api.github.com/users/pabloyanezb')
-    .then((datos) => {
-      this.avatar = datos.data.avatar_url;
-      this.usuario = datos.data.login;
-      this.repositorios = datos.data.public_repos;
-      this.seguidores = datos.data.followers;
-      this.seguidos = datos.data.following;
-      this.gists = datos.data.public_gists;
-      this.puntaje = datos.data.public_repos + datos.data.followers + datos.data.following;
-    })
+    this.cargarDatos();
   }
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.form {
+  margin-bottom: 1rem;
+}
 .tabla {
   margin-top: 1rem;
 }
