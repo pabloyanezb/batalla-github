@@ -1,57 +1,74 @@
 <template>
-  <b-row align-h="center">
-    <b-col col lg="4" sm="6">
+    <b-col col sm="6">
       <b-card
         bg-variant="dark"
-        :header="msg"
         text-variant="white"
         class="text-center"
-      >
-        
+      >  
+        <h3>Nombre de usuario:</h3>
         <b-form class="form">
-          <b-row>
-            <b-col col sm="8">
-              <b-form-input size="m" placeholder="Search" v-model="usuario"></b-form-input>
-            </b-col>
-            <b-col col sm="2">
-              <b-button size="m" type="submit" @click="cargarDatos">Search</b-button>
-            </b-col>
-          </b-row>
+          <b-input-group class="mt-3">
+            <b-form-input placeholder="Usuario" v-model="nombre"></b-form-input>
+            <b-button type="submit" @click.prevent="cargarDatos">Buscar</b-button>
+          </b-input-group>
         </b-form>
         <b-avatar :src="avatar" size="6rem" rounded></b-avatar>
-        <h3>Username: {{ nombre }}</h3>
-        <b-row class="tabla">
-          <b-col col sm="8" class="left">
-            <h5>Repositorios Públicos</h5>
-            <h5>Seguidores</h5>
-            <h5>Seguidos</h5>
-            <h5>Guists</h5>
-            <h5 class="font-weight-bold">Puntaje Total</h5>
-          </b-col>
-          <b-col col sm="4">
-            <h5>{{ repositorios }}</h5>
-            <h5>{{ seguidores }}</h5>
-            <h5>{{ seguidos }}</h5>
-            <h5>{{ gists }}</h5>
-            <h5 class="font-weight-bold">{{ puntaje }}</h5>
-          </b-col>
-        </b-row>
+        <div class="tabla">
+          <b-row>
+            <b-col col sm="8" class="left">
+              <h5>Repositorios Públicos</h5>
+            </b-col>
+            <b-col col sm="4">
+              <h5>{{ repositorios }}</h5>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col col sm="8" class="left">
+              <h5>Seguidores</h5>
+            </b-col>
+            <b-col col sm="4">
+              <h5>{{ seguidores }}</h5>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col col sm="8" class="left">
+              <h5>Seguidos</h5>
+            </b-col>
+            <b-col col sm="4">
+              <h5>{{ seguidos }}</h5>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col col sm="8" class="left">
+              <h5>Gists Públicos</h5>
+            </b-col>
+            <b-col col sm="4">
+              <h5>{{ gists }}</h5>
+            </b-col>
+          </b-row>
+          <b-row>
+            <b-col col sm="8" class="left">
+              <h5 class="font-weight-bold">Puntaje Total</h5>
+            </b-col>
+            <b-col col sm="4">
+              <h5 class="font-weight-bold">{{ puntaje }}</h5>
+            </b-col>
+          </b-row>
+        </div>
       </b-card>
     </b-col>
-  </b-row>
 </template>
 
 <script>
 export default {
   name: "Jugador",
   props: {
-    msg: String,
+    jugador: String,
   },
   data() {
     return {
-      usuario: 'pabloyanezb',
+      nombre: 'pabloyanezb',
       avatar: null,
-      nombre: null,
       repositorios: null,
       seguidores: null,
       seguidos: null,
@@ -61,7 +78,7 @@ export default {
   },
   methods: {
     cargarDatos() {
-      this.axios.get(`https://api.github.com/users/${this.usuario}`)
+      this.axios.get(`https://api.github.com/users/${this.nombre}`)
       .then((datos) => {
         const usuario = datos.data;
         this.avatar = usuario.avatar_url;
@@ -71,6 +88,15 @@ export default {
         this.seguidos = usuario.following;
         this.gists = usuario.public_gists;
         this.puntaje = usuario.public_repos + usuario.followers + usuario.following + usuario.public_gists;
+        if (this.jugador === '1'){
+          this.$store.commit('Update1', {puntaje: this.puntaje, nombre: this.nombre});
+        }
+        if (this.jugador === '2'){
+          this.$store.commit('Update2', {puntaje: this.puntaje, nombre: this.nombre});
+        }
+      })
+      .catch(error => {
+        console.log(error);
       })
     }
   },
@@ -86,26 +112,10 @@ export default {
   margin-bottom: 1rem;
 }
 .tabla {
-  margin-top: 1rem;
+  margin-top: 2rem;
 }
 .left {
   text-align: start;
-}
-.hidden_header {
-  display: none;
-}
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+  padding-left: 40px;
 }
 </style>
