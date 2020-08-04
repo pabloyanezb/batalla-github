@@ -12,49 +12,54 @@
             <b-button type="submit" @click.prevent="cargarDatos">Buscar</b-button>
           </b-input-group>
         </b-form>
-        <b-avatar :src="avatar" size="6rem" rounded></b-avatar>
-        <div class="tabla">
-          <b-row>
-            <b-col col sm="8" class="left">
-              <h5>Repositorios Públicos</h5>
-            </b-col>
-            <b-col col sm="4">
-              <h5>{{ repositorios }}</h5>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col col sm="8" class="left">
-              <h5>Seguidores</h5>
-            </b-col>
-            <b-col col sm="4">
-              <h5>{{ seguidores }}</h5>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col col sm="8" class="left">
-              <h5>Seguidos</h5>
-            </b-col>
-            <b-col col sm="4">
-              <h5>{{ seguidos }}</h5>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col col sm="8" class="left">
-              <h5>Gists Públicos</h5>
-            </b-col>
-            <b-col col sm="4">
-              <h5>{{ gists }}</h5>
-            </b-col>
-          </b-row>
-          <b-row>
-            <b-col col sm="8" class="left">
-              <h5 class="font-weight-bold">Puntaje Total</h5>
-            </b-col>
-            <b-col col sm="4">
-              <h5 class="font-weight-bold">{{ puntaje }}</h5>
-            </b-col>
-          </b-row>
-        </div>
+        <b-overlay :show="isLoading" rounded="sm" variant="dark">
+          <b-avatar :src="avatar" size="6rem" rounded></b-avatar>
+          <div class="tabla" :aria-hidden="isLoading ? 'false' : null">
+            <b-row>
+              <b-col col sm="8" class="left">
+                <h5>Repositorios Públicos</h5>
+              </b-col>
+              <b-col col sm="4">
+                <h5>{{ repositorios }}</h5>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col col sm="8" class="left">
+                <h5>Seguidores</h5>
+              </b-col>
+              <b-col col sm="4">
+                <h5>{{ seguidores }}</h5>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col col sm="8" class="left">
+                <h5>Seguidos</h5>
+              </b-col>
+              <b-col col sm="4">
+                <h5>{{ seguidos }}</h5>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col col sm="8" class="left">
+                <h5>Gists Públicos</h5>
+              </b-col>
+              <b-col col sm="4">
+                <h5>{{ gists }}</h5>
+              </b-col>
+            </b-row>
+            <b-row>
+              <b-col col sm="8" class="left">
+                <h5 class="font-weight-bold">Puntaje Total</h5>
+              </b-col>
+              <b-col col sm="4">
+                <h5 class="font-weight-bold">{{ puntaje }}</h5>
+              </b-col>
+            </b-row>
+          </div>
+        </b-overlay>
+        <b-modal id="modal-error"  ref="modal-error" centered>
+          <h4> Usuario  no encontrado. Intentelo nuevamente. </h4>
+        </b-modal>
       </b-card>
     </b-col>
 </template>
@@ -67,6 +72,7 @@ export default {
   },
   data() {
     return {
+      isLoading: false,
       nombre: 'pabloyanezb',
       avatar: null,
       repositorios: null,
@@ -80,6 +86,7 @@ export default {
     cargarDatos() {
       this.axios.get(`https://api.github.com/users/${this.nombre}`)
       .then((datos) => {
+        this.isLoading = true;
         const usuario = datos.data;
         this.avatar = usuario.avatar_url;
         this.nombre = usuario.login;
@@ -94,9 +101,14 @@ export default {
         if (this.jugador === '2'){
           this.$store.commit('Update2', {puntaje: this.puntaje, nombre: this.nombre});
         }
+        this.isLoading = false;
       })
       .catch(error => {
-        console.log(error);
+        if(error.response.status == 404){
+          this.$refs['modal-error'].show()
+        } else {
+          console.log(error)
+        }
       })
     }
   },
